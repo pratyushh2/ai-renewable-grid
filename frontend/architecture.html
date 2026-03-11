@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartGrid OS | Architecture</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <style>
+        .ascii-container {
+            background-color: var(--bg-tertiary);
+            padding: 2rem;
+            border-radius: var(--border-radius-md);
+            font-family: var(--font-mono);
+            white-space: pre;
+            line-height: 1.4;
+            color: var(--accent-primary);
+            overflow-x: auto;
+            margin-bottom: 3rem;
+        }
+
+        .api-block {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: var(--border-radius-md);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .method-badge {
+            background-color: var(--success);
+            color: var(--bg-primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--border-radius-sm);
+            font-family: var(--font-mono);
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-right: 1rem;
+        }
+
+        .code-block {
+            background-color: var(--bg-primary);
+            padding: 1rem;
+            border-radius: var(--border-radius-sm);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+        <a href="index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="simulation.html">Simulation</a>
+        <a href="architecture.html" class="active">Architecture</a>
+        <a href="about.html">About</a>
+    </nav>
+    
+    <div style="position: absolute; top: 1.5rem; left: 2rem;">
+        <a href="index.html" class="brand">
+            <div class="brand-dot"></div>
+            SmartGrid OS
+        </a>
+    </div>
+
+    <main class="main-content" style="margin-left: 0; padding-top: 6rem; max-width: 1000px; margin: 0 auto;">
+        
+        <h1 style="font-size: 2.5rem; margin-bottom: 2rem;">System Architecture</h1>
+        
+        <div class="section-heading">Core Pipeline Diagram</div>
+        
+        <div class="ascii-container">
+[ User Client / Vanilla JS ] ────────────────┐
+                                             │ Polls every 10s
+                                             ▼
+                                  [ FastAPI Backend ]
+                                             │
+             ┌───────────────────────────────┴───────────────────────────────┐
+             │                               │                               │
+             ▼                               ▼                               ▼
+    [ Weather Service ]           [ Demand Simulator ]            [ Storage Manager ]
+    Fetches Open-Meteo            Builds zone curves               80 MWh virtual batt.
+             │                               │                               │
+             ▼                               ▼                               │
+    [ ML Generation ]                        │                               │
+    Random Forest Reg.                       │                               │
+             │                               │                               │
+             └───────────────┬───────────────┘                               │
+                             ▼                                               │
+                   [ Energy Optimizer ] ◄────────────────────────────────────┘
+                   Priority Waterfall Allocator
+                             │
+                             ▼
+                      [ JSON state ]
+        </div>
+        
+        <div class="section-heading">FastAPI Reference</div>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">Active endpoints served by the backend loop on <code>http://127.0.0.1:8000</code></p>
+        
+        <div class="api-block">
+            <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                <span class="method-badge">GET</span>
+                <span class="mono-text" style="font-size: 1.1rem; color: var(--text-primary);">/smart-grid-status</span>
+            </div>
+            <p style="color: var(--text-secondary);">Returns the latest computed state of the grid. Powered by a background asyncio loop running every 10 seconds.</p>
+            <div class="code-block">
+{
+  "weather": { "temperature": 38.0, "cloud_cover": 42, ... },
+  "solar_generation": 72.5,
+  "total_demand": 80.0,
+  "battery_before": 50.0,
+  "backup_used": 7.5,
+  "battery_after": 42.5,
+  "optimized_distribution": {
+    "Hospital": { "demand": 15, "allocated": 15, "status": "fully_met" },
+    ...
+  }
+}
+            </div>
+        </div>
+
+        <div class="api-block">
+            <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                <span class="method-badge">GET</span>
+                <span class="mono-text" style="font-size: 1.1rem; color: var(--text-primary);">/battery-history</span>
+            </div>
+            <p style="color: var(--text-secondary);">Returns historical battery state dumps from the internal CSV log.</p>
+        </div>
+
+        <div class="api-block">
+            <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                <span class="method-badge">GET</span>
+                <span class="mono-text" style="font-size: 1.1rem; color: var(--text-primary);">/forecast-tomorrow</span>
+            </div>
+            <p style="color: var(--text-secondary);">Predicts tomorrow's energy balance based on the current weather parameters offset by 5°C module temperature difference.</p>
+        </div>
+        
+    </main>
+
+</body>
+</html>

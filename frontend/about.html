@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartGrid OS | About</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <style>
+        .about-content {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: var(--border-radius-md);
+            padding: 3rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .about-content h2 {
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: var(--accent-primary);
+        }
+
+        .about-content p, .about-content li {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .about-content ul {
+            padding-left: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        code {
+            background-color: var(--bg-primary);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.9em;
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+        <a href="index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="simulation.html">Simulation</a>
+        <a href="architecture.html">Architecture</a>
+        <a href="about.html" class="active">About</a>
+    </nav>
+    
+    <div style="position: absolute; top: 1.5rem; left: 2rem;">
+        <a href="index.html" class="brand">
+            <div class="brand-dot"></div>
+            SmartGrid OS
+        </a>
+    </div>
+
+    <main class="main-content" style="margin-left: 0; padding-top: 6rem;">
+        
+        <div class="about-content">
+            <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">About SmartGrid OS</h1>
+            <p>Developed for the Energy Conservation Week Hackathon.</p>
+            
+            <h2>Running the System Locally</h2>
+            <p>To run the digital twin yourself, follow these instructions:</p>
+            
+            <ol>
+                <li>Ensure you have <code>python 3.x</code> installed.</li>
+                <li>Install dependencies from the root directory: <br><br><code>pip install -r requirements.txt</code><br><br></li>
+                <li>Run the FastAPI backend server (from root): <br><br><code>uvicorn backend.app:app --reload</code><br><br></li>
+                <li>Serve the frontend. You can use Python's built-in http server: <br><br><code>cd frontend && python -m http.server 3000</code><br><br></li>
+                <li>Navigate to <code>http://localhost:3000</code> in your browser.</li>
+            </ol>
+            
+            <h2>AI Assistant (GridAI)</h2>
+            <p>The GridAI Copilot is a custom rule-based pattern matching agent directly injected into the frontend Javascript. It avoids high-latency external API calls such as OpenAI, allowing operators to get instant natural-language breakdown of grid conditions without the overhead.</p>
+            
+            <h2>Credits</h2>
+            <p>Team Strawberry Icecream.</p>
+        </div>
+        
+    </main>
+
+</body>
+</html>

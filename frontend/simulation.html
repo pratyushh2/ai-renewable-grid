@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartGrid OS | What-If Simulator</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    
+    <style>
+        .sim-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .controls-panel {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: var(--border-radius-md);
+            padding: 2rem;
+        }
+
+        .results-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .slider-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-family: var(--font-body);
+        }
+
+        .slider-val {
+            font-family: var(--font-mono);
+            color: var(--accent-primary);
+            font-weight: bold;
+        }
+
+        input[type=range] {
+            width: 100%;
+            -webkit-appearance: none;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: var(--accent-primary);
+            cursor: pointer;
+            margin-top: -6px;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: var(--bg-tertiary);
+            border-radius: 2px;
+        }
+
+        .sim-card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: var(--border-radius-md);
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .sim-val {
+            font-size: 2.5rem;
+            font-weight: bold;
+            font-family: var(--font-mono);
+            margin: 0.5rem 0;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 8px;
+            background-color: var(--bg-tertiary);
+            border-radius: var(--border-radius-full);
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--success);
+            border-radius: var(--border-radius-full);
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+        <a href="index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="simulation.html" class="active">What-If Simulator</a>
+        <a href="architecture.html">Architecture</a>
+        <a href="about.html">About</a>
+    </nav>
+    
+    <div style="position: absolute; top: 1.5rem; left: 2rem;">
+        <a href="index.html" class="brand">
+            <div class="brand-dot"></div>
+            SmartGrid OS
+        </a>
+    </div>
+
+    <main class="main-content" style="margin-left: 0; padding-top: 6rem;">
+        
+        <div style="max-width: 1200px; margin: 0 auto; margin-bottom: 2rem;">
+            <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">What-If Grid Simulator</h1>
+            <p style="color: var(--text-secondary);">Interactive planning tool to predict grid stability under extreme variables.</p>
+        </div>
+        
+        <div class="sim-container">
+            <!-- Controls -->
+            <div class="controls-panel">
+                <h3 style="margin-bottom: 2rem; color: var(--text-secondary);"><i class="fas fa-sliders-h"></i> Infrastructure Variables</h3>
+                
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <span><i class="fas fa-solar-panel text-warning"></i> Max Solar Capacity</span>
+                        <span class="slider-val" id="val-cap">120 MW</span>
+                    </div>
+                    <input type="range" id="slip-cap" min="50" max="300" value="120" oninput="runSim()">
+                </div>
+                
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <span><i class="fas fa-battery-full text-success"></i> Battery Storage Size</span>
+                        <span class="slider-val" id="val-bat">80 MWh</span>
+                    </div>
+                    <input type="range" id="slip-bat" min="20" max="250" value="80" oninput="runSim()">
+                </div>
+
+                <div class="slider-group" style="margin-top: 3rem;">
+                    <div class="slider-header">
+                        <span><i class="fas fa-cloud"></i> Weather (Cloud Cover)</span>
+                        <span class="slider-val" id="val-cloud">20%</span>
+                    </div>
+                    <input type="range" id="slip-cloud" min="0" max="100" value="20" oninput="runSim()">
+                </div>
+
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <span><i class="fas fa-city text-danger"></i> City Base Demand</span>
+                        <span class="slider-val" id="val-dem">150 MW</span>
+                    </div>
+                    <input type="range" id="slip-dem" min="80" max="400" value="150" oninput="runSim()">
+                </div>
+                
+                <div style="margin-top: 2rem; padding: 1rem; background: rgba(0, 229, 255, 0.1); border-radius: 8px; border: 1px solid rgba(0, 229, 255, 0.2); font-size: 0.85rem;">
+                    <i class="fas fa-info-circle text-accent"></i> <strong>How it works:</strong> The simulator calculates outcomes locally. Solar generation inversely decays with cloud cover. If generation < demand, the battery discharges until empty, then power is curtailed.
+                </div>
+            </div>
+            
+            <!-- Results -->
+            <div class="results-panel">
+                <div class="sim-card">
+                    <div style="color: var(--text-secondary); text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;">Predicted Grid Stability</div>
+                    <div class="sim-val text-accent" id="res-stability">100%</div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="bar-stability" style="width: 100%;"></div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div class="sim-card">
+                        <div style="color: var(--text-secondary); font-size: 0.85rem;"><i class="fas fa-sun text-warning"></i> Output vs Demand</div>
+                        <div class="sim-val" style="font-size: 1.8rem;" id="res-balance"><span class="text-success">+24.0 MW</span></div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);" id="res-generation">Gen: 96.0 MW | Dem: 150.0 MW</div>
+                    </div>
+                    
+                    <div class="sim-card">
+                        <div style="color: var(--text-secondary); font-size: 0.85rem;"><i class="fas fa-battery-half text-success"></i> Battery Status</div>
+                        <div class="sim-val" style="font-size: 1.8rem;" id="res-bat-usage"><span class="text-secondary">Holding</span></div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);" id="res-bat-level">Reserves untouched</div>
+                    </div>
+                </div>
+                
+                <div class="sim-card" style="text-align: left; background-color: #0d1117;">
+                    <div style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1rem;"><i class="fas fa-stream"></i> Simulated AI Action</div>
+                    <div id="res-action" style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--success); line-height: 1.6;">
+                        > GRID NOMINAL.<br>
+                        > All priority zones fully powered.<br>
+                        > Excess generation charging storage arrays.
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </main>
+
+    <script>
+        async function runSim() {
+            // Get inputs
+            const cap = parseFloat(document.getElementById('slip-cap').value);
+            const batMax = parseFloat(document.getElementById('slip-bat').value);
+            const cloud = parseFloat(document.getElementById('slip-cloud').value);
+            const dem = parseFloat(document.getElementById('slip-dem').value);
+            
+            // Update labels
+            document.getElementById('val-cap').innerText = `${cap} MW`;
+            document.getElementById('val-bat').innerText = `${batMax} MWh`;
+            document.getElementById('val-cloud').innerText = `${cloud}%`;
+            document.getElementById('val-dem').innerText = `${dem} MW`;
+            
+            try {
+                const response = await fetch('http://127.0.0.1:8000/simulate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        solar_capacity: cap,
+                        battery_size: batMax,
+                        cloud_cover: cloud,
+                        city_demand: dem
+                    })
+                });
+                
+                const res = await response.json();
+                
+                // UI UPDATES
+                const bar = document.getElementById('bar-stability');
+                bar.style.width = `${res.stability}%`;
+                
+                const stabText = document.getElementById('res-stability');
+                stabText.innerText = `${res.stability.toFixed(1)}%`;
+                
+                if (res.stability >= 99) {
+                    stabText.className = 'sim-val text-success';
+                    bar.style.backgroundColor = 'var(--success)';
+                } else if (res.stability > 70) {
+                    stabText.className = 'sim-val text-warning';
+                    bar.style.backgroundColor = 'var(--warning)';
+                } else {
+                    stabText.className = 'sim-val text-danger';
+                    bar.style.backgroundColor = 'var(--danger)';
+                }
+                
+                // Balance text
+                const balNode = document.getElementById('res-balance');
+                if (res.balance >= 0) {
+                    balNode.innerHTML = `<span class="text-success">+${res.balance.toFixed(1)} MW</span>`;
+                } else {
+                    balNode.innerHTML = `<span class="text-danger">${res.balance.toFixed(1)} MW</span>`;
+                }
+                
+                document.getElementById('res-generation').innerText = `Solar Gen: ${res.solar_gen.toFixed(1)} MW | Demand: ${dem.toFixed(1)} MW`;
+                
+                // Battery Text
+                let batStatusHtml = '';
+                if(res.bat_status === 'Charging') {
+                    batStatusHtml = `<span class="text-success">${res.bat_status}</span>`;
+                } else if(res.bat_status === 'Discharging') {
+                    batStatusHtml = `<span class="text-warning">${res.bat_status}</span>`;
+                } else {
+                    batStatusHtml = `<span class="text-danger">${res.bat_status}</span>`;
+                }
+                
+                document.getElementById('res-bat-usage').innerHTML = batStatusHtml;
+                document.getElementById('res-bat-level').innerText = "Dynamic Usage Prediction";
+                
+                // Action Text
+                const actionLogs = document.getElementById('res-action');
+                if (res.stability >= 99) {
+                    actionLogs.innerHTML = `> GRID NOMINAL.<br>> Assembly and Govt Offices stable.<br>> Storage operational.`;
+                    actionLogs.style.color = 'var(--success)';
+                } else if (res.stability > 75) {
+                    actionLogs.innerHTML = `> GRID DEGRADED.<br>> Deficit detected. Dispatching reserves.<br>> Low priority functions curtailed.`;
+                    actionLogs.style.color = 'var(--warning)';
+                } else {
+                    actionLogs.innerHTML = `> CRITICAL SHORTAGE.<br>> Curtailing Residential zones.<br>> PROTECTING Assembly infrastructure.`;
+                    actionLogs.style.color = 'var(--danger)';
+                }
+                
+            } catch(e) {
+                console.error("Simulation API Error:", e);
+            }
+        }
+        
+        // Init run
+        document.addEventListener('DOMContentLoaded', runSim);
+    </script>
+</body>
+</html>

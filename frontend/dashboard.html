@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartGrid OS | Dashboard</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <style>
+        /* Specific Dashboard Styles */
+        .weather-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .weather-card i {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+        }
+        
+        .zone-allocation {
+            margin-top: 1rem;
+        }
+        
+        .zone-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            gap: 1rem;
+        }
+        
+        .zone-label {
+            width: 80px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        .progress-bar-bg {
+            flex: 1;
+            height: 6px;
+            background-color: var(--bg-tertiary);
+            border-radius: var(--border-radius-full);
+            overflow: hidden;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: var(--border-radius-full);
+            transition: width 0.5s ease;
+        }
+        
+        .zone-value {
+            width: 70px;
+            text-align: right;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+        }
+        
+        /* Battery Visual */
+        .battery-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 1rem 0;
+        }
+        
+        .battery-shell {
+            width: 80px;
+            height: 140px;
+            border: 3px solid var(--text-secondary);
+            border-radius: 8px;
+            position: relative;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: flex-end;
+            padding: 3px;
+        }
+        
+        .battery-shell::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 8px;
+            background-color: var(--text-secondary);
+            border-radius: 4px 4px 0 0;
+        }
+        
+        .battery-level {
+            width: 100%;
+            background-color: var(--success);
+            border-radius: 4px;
+            transition: height 0.5s ease, background-color 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--bg-primary);
+            font-weight: bold;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+        }
+        
+        .battery-status {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+        
+        /* Copilot Chat */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .chat-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .copilot-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #00e5ff, #0ea5e9);
+            border-radius: var(--border-radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.25rem;
+        }
+        
+        .chat-pills {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .chat-pill {
+            background-color: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--border-radius-full);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .chat-pill:hover {
+            background-color: rgba(0, 229, 255, 0.1);
+            color: var(--accent-primary);
+            border-color: rgba(0, 229, 255, 0.3);
+        }
+        
+        .chat-box {
+            background-color: var(--bg-primary);
+            border-radius: var(--border-radius-md);
+            padding: 1rem;
+            flex: 1;
+            min-height: 120px;
+            margin-bottom: 1rem;
+            overflow-y: auto;
+            border: 1px solid var(--bg-tertiary);
+            font-size: 0.9rem;
+        }
+        
+        .chat-input-row {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .chat-input {
+            flex: 1;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--bg-tertiary);
+            color: var(--text-primary);
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius-full);
+            outline: none;
+            font-family: var(--font-body);
+        }
+        
+        .chat-input:focus {
+            border-color: var(--accent-primary);
+        }
+        
+        .chat-btn {
+            background-color: var(--accent-primary);
+            color: var(--bg-primary);
+            border: none;
+            padding: 0 1.5rem;
+            border-radius: var(--border-radius-full);
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        /* Location Header */
+        .location-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            background-color: var(--bg-tertiary);
+            padding: 0.5rem 1.25rem;
+            border-radius: var(--border-radius-full);
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .location-icon {
+            color: var(--danger);
+        }
+        
+        .pulsing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--warning);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--warning);
+            animation: pulse 2s infinite;
+        }
+        
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 1px solid var(--warning);
+            color: var(--warning);
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--border-radius-full);
+            font-size: 0.75rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        
+        .status-pill.stable {
+            border-color: var(--success);
+            color: var(--success);
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <a href="index.html" class="brand">
+            <div class="brand-dot"></div>
+            SmartGrid OS
+        </a>
+        
+        <ul class="nav-links">
+            <a href="dashboard.html" class="nav-item active"><i class="fas fa-chart-pie"></i> Dashboard</a>
+            <a href="#" class="nav-item"><i class="fas fa-cloud"></i> Weather</a>
+            <a href="#" class="nav-item"><i class="fas fa-sun"></i> Solar Prediction</a>
+            <a href="#" class="nav-item"><i class="fas fa-city"></i> Demand</a>
+            <a href="#" class="nav-item"><i class="fas fa-cogs"></i> Optimization</a>
+            <a href="simulation.html" class="nav-item"><i class="fas fa-flask"></i> Simulation</a>
+            <a href="#" class="nav-item"><i class="fas fa-robot"></i> AI Assistant</a>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        
+        <!-- Header Row -->
+        <div class="top-header">
+            <div class="page-title">
+                <h1>Grid Control Center</h1>
+                <p>Real-time renewable energy monitoring & optimization</p>
+            </div>
+            
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <button id="btn-report" class="btn btn-secondary" onclick="downloadReport()"><i class="fas fa-file-pdf"></i> Daily Report</button>
+                <div class="status-pill" id="global-status-pill">
+                    <div class="pulsing-dot" id="status-dot"></div>
+                    <span id="global-status-text">DEGRADED</span>
+                </div>
+                <!-- Search Bar -->
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Search city or lat,lon..." value="Amaravati">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Storm Mode Banner -->
+        <div id="storm-banner" style="display: none; background-color: rgba(248, 113, 113, 0.15); border: 1px solid var(--danger); border-radius: var(--border-radius-md); padding: 1rem 1.5rem; margin-bottom: 2rem; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <i class="fas fa-exclamation-triangle text-danger" style="font-size: 1.5rem;"></i>
+                <div>
+                    <h3 style="color: var(--danger); margin-bottom: 0.25rem;">Storm Safe Mode Activated</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem;">High wind speeds detected. Solar curtailed and battery discharge limited to protect infrastructure.</p>
+                </div>
+            </div>
+            <div class="mono-text" style="color: var(--danger); font-weight: bold; font-size: 1.25rem;" id="val-storm-wind">-- km/h</div>
+        </div>
+
+        <!-- Location Banner -->
+        <div class="location-box">
+            <i class="fas fa-map-marker-alt location-icon"></i>
+            <div>
+                <div style="font-weight: bold;">Amaravati, AP</div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary);" class="mono-text">16.51, 80.52</div>
+            </div>
+            <div style="margin-left: 2rem; color: var(--text-secondary);" class="mono-text" id="current-time">
+                --:--:--
+            </div>
+        </div>
+        
+        <div class="section-heading">Grid Metrics</div>
+        
+        <!-- Metrics Row -->
+        <div class="grid-metrics">
+            <div class="card metric-card">
+                <div class="metric-header" style="justify-content: space-between;">
+                    <span><i class="fas fa-sun text-warning"></i> Solar Gen</span>
+                    <span id="solar-eff-badge" class="status-pill stable" style="font-size: 0.6rem; padding: 0.1rem 0.4rem;">92% EFF</span>
+                </div>
+                <div class="metric-value text-accent"><span id="val-solar">--</span><span class="metric-unit">MW</span></div>
+                <div class="metric-subtitle">current generation</div>
+            </div>
+            
+            <div class="card metric-card">
+                <div class="metric-header"><i class="fas fa-bolt text-danger"></i> Total Demand</div>
+                <div class="metric-value"><span id="val-demand">--</span><span class="metric-unit">MW</span></div>
+                <div class="metric-subtitle">all zones combined</div>
+            </div>
+            
+            <div class="card metric-card">
+                <div class="metric-header"><i class="fas fa-exclamation-triangle text-warning"></i> Shortfall</div>
+                <div class="metric-value text-danger"><span id="val-shortfall">--</span><span class="metric-unit">MW</span></div>
+                <div class="metric-subtitle">unmet demand</div>
+            </div>
+            
+            <div class="card metric-card">
+                <div class="metric-header"><i class="fas fa-signal text-accent"></i> Grid Stability</div>
+                <div class="metric-value text-success"><span id="val-stability">--</span><span class="metric-unit">%</span></div>
+                <div class="metric-subtitle">coverage ratio</div>
+            </div>
+            
+            <div class="card metric-card">
+                <div class="metric-header"><i class="fas fa-battery-half text-success"></i> Battery Level</div>
+                <div class="metric-value text-warning"><span id="val-battery">--</span><span class="metric-unit">%</span></div>
+                <div class="metric-subtitle">of 80 MWh capacity</div>
+            </div>
+        </div>
+        
+        <div class="section-heading">Live Weather</div>
+        
+        <!-- Weather Row -->
+        <div class="grid-weather">
+            <div class="card weather-card">
+                <i class="fas fa-thermometer-half"></i>
+                <div>
+                    <div class="metric-header">Temperature</div>
+                    <div class="mono-text" style="font-size: 1.25rem;"><span id="val-temp">--</span> °C</div>
+                </div>
+            </div>
+            <div class="card weather-card">
+                <i class="fas fa-cloud"></i>
+                <div>
+                    <div class="metric-header">Cloud Cover</div>
+                    <div class="mono-text" style="font-size: 1.25rem;"><span id="val-cloud">--</span>%</div>
+                </div>
+            </div>
+            <div class="card weather-card">
+                <i class="fas fa-certificate"></i>
+                <div>
+                    <div class="metric-header">Irradiance</div>
+                    <div class="mono-text" style="font-size: 1.25rem;"><span id="val-irrad">--</span> W/m²</div>
+                </div>
+            </div>
+            <div class="card weather-card">
+                <i class="fas fa-wind"></i>
+                <div>
+                    <div class="metric-header">Wind Speed</div>
+                    <div class="mono-text" style="font-size: 1.25rem;"><span id="val-wind">--</span> km/h</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section-heading">Forecast & Analysis</div>
+        
+        <!-- Charts Row -->
+        <div class="grid-charts">
+            <div class="card">
+                <div class="metric-header mb-3"><i class="fas fa-sun text-warning"></i> 24-Hour Solar Generation Forecast</div>
+                <div style="height: 250px; width: 100%;">
+                    <canvas id="solarChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="metric-header mb-3"><i class="fas fa-cog"></i> Energy Allocation</div>
+                <div style="height: 250px; width: 100%; display: flex; justify-content: center;">
+                    <canvas id="allocationChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section-heading">Zone Demand • Battery • AI Copilot</div>
+        
+        <!-- Bottom Row -->
+        <div class="grid-bottom">
+            <!-- Zone Breakdown Card -->
+            <div class="card">
+                <div class="metric-header mb-3"><i class="fas fa-city mb-3"></i> Zone Allocation Details</div>
+                
+                <div style="height: 150px; margin-bottom: 2rem;">
+                    <canvas id="demandBarChart"></canvas>
+                </div>
+                
+                <div class="metric-header mb-2" style="font-size: 0.65rem;">ALLOCATION BY ZONE</div>
+                <div class="zone-allocation" id="zone-allocation-container">
+                    <!-- Zone rows injected here -->
+                </div>
+            </div>
+            
+            <!-- Battery Card -->
+            <div class="card">
+                <div class="metric-header mb-3">
+                    <i class="fas fa-battery-full text-success"></i> Battery Storage
+                    <span id="battery-soh" style="float: right; color: var(--text-secondary); font-size: 0.75rem;">Health (SoH): <span class="text-success" style="font-weight: bold;">92.4%</span></span>
+                </div>
+                
+                <div class="battery-container">
+                    <div class="battery-shell">
+                        <div class="battery-level" id="battery-fill" style="height: 0%;">0%</div>
+                    </div>
+                    
+                    <div class="battery-status">
+                        <div id="battery-state-text" class="mono-text" style="margin-bottom: 0.5rem;">↓ Discharging · 0.0%</div>
+                        <div>80 MWh capacity</div>
+                        <div id="battery-strategy-text">Smart Dispatch Active: Discharges during shortfall or incoming cloud cover</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- AI Copilot Card -->
+            <div class="card">
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <div class="copilot-icon"><i class="fas fa-robot"></i></div>
+                        <div>
+                            <div style="font-weight: bold; font-family: var(--font-heading);">GridAI Copilot</div>
+                            <div style="font-size: 0.8rem; color: var(--accent-primary);">Rule-based grid assistant</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-pills">
+                        <div class="chat-pill" onclick="sendPill('Energy shortage')">Energy shortage</div>
+                        <div class="chat-pill" onclick="sendPill('EV charging')">EV charging</div>
+                        <div class="chat-pill" onclick="sendPill('Battery')">Battery</div>
+                        <div class="chat-pill" onclick="sendPill('Grid status')">Grid status</div>
+                    </div>
+                    
+                    <div class="chat-box" id="chat-box">
+                        <div style="margin-bottom: 1rem;">
+                            <strong>👋 Hi! I'm GridAI Copilot.</strong><br><br>
+                            I monitor the live grid state. Ask me about energy shortages, battery status, zone allocation, or weather impact!
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input-row">
+                        <input type="text" id="chat-input" class="chat-input" placeholder="Ask about the grid...">
+                        <button class="chat-btn" id="chat-submit">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section-heading" style="margin-top: 2rem;">Data Integrity</div>
+        
+        <!-- Data Integrity Row -->
+        <div class="card" style="margin-bottom: 2rem; background-color: #0d1117;">
+            <div class="metric-header mb-3"><i class="fas fa-shield-alt text-success"></i> Distributed Audit Log</div>
+            <p style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 1rem;">SHA-256 verification hashes for AI optimization decisions</p>
+            <div id="audit-terminal" class="mono-text" style="color: #00e5ff; font-size: 0.75rem; height: 120px; overflow-y: auto; background-color: #000; padding: 1rem; border-radius: var(--border-radius-sm); border: 1px solid #1a202c; white-space: pre-wrap; display: flex; flex-direction: column-reverse;">
+                <!-- Hashes injected here -->
+            </div>
+        </div>
+        
+    </main>
+
+    <!-- Page Scripts -->
+    <script type="module" src="js/api.js"></script>
+    <script type="module" src="js/dashboard.js"></script>
+    <script type="module" src="js/copilot.js"></script>
+</body>
+</html>
