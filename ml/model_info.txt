@@ -1,0 +1,20 @@
+Model: RandomForestRegressor
+
+Dataset:
+Solar Power Plant Dataset
+
+Features:
+- Irradiation
+- Ambient Temperature
+- Module Temperature
+
+Target:
+- AC Power
+
+Performance:
+MAE ≈ 16
+R² ≈ 0.986
+
+Training Split:
+80% training
+20% testing
