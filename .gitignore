@@ -1,15 +1,43 @@
+# Python cache
 __pycache__/
 *.pyc
-*.pkl
-.env
+*.pyo
+*.pyd
 
-# ignore processed or generated files
+# ML models
+*.pkl
+*.joblib
+*.h5
+
+# Virtual environment
+.env
+venv/
+.env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Generated data
 data/processed/
 data/simulation/
 
-# keep raw datasets
+# Keep raw datasets
 !data/raw/
+
+# Battery logs and runtime logs
+data/battery_log.csv
+data/energy_forecast.csv
 
 # OS junk
 .DS_Store
 Thumbs.db
+
+# VS Code
+.vscode/
+
+# Node (if frontend later uses npm)
+node_modules/
+
+# Temporary files
+*.log
+*.tmp
