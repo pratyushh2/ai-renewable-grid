@@ -3,5 +3,13 @@ __pycache__/
 *.pkl
 .env
 
-data/*
-!data/.gitkeep
+# ignore processed or generated files
+data/processed/
+data/simulation/
+
+# keep raw datasets
+!data/raw/
+
+# OS junk
+.DS_Store
+Thumbs.db
